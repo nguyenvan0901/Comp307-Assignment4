@@ -1,3 +1,6 @@
+import java.util.*;
+import java.util.Map;
+
 public class Utility {
 
     /**
@@ -8,7 +11,10 @@ public class Utility {
      */
     public static double calculateEuclideanDistance(VRPNode node1, VRPNode node2) {
         // TODO: Implement the function to calculate the Euclidean distance.
-        return 0.0;
+        double x_dif_squared = Math.pow(node1.getX() - node2.getX(),2);
+        double y_dif_squared = Math.pow(node1.getY() - node2.getY(),2);
+
+        return Math.sqrt(x_dif_squared + y_dif_squared);
     }
 
     /**
@@ -20,7 +26,33 @@ public class Utility {
      */
     public static double calculateTotalCost(VRPSolution solution, VRPInstance instance) {
         // TODO: Implement the function to calculate the total cost of the solution.
-        return 0.0;
+        double total_cost = 0.0;
+
+        Map<Integer, VRPNode> nodes = instance.getNodes();
+        List<List<Integer>> routes = solution.getRoutes();
+
+        for(List<Integer> route: routes){
+
+            // distance from depot to the first node
+            VRPNode depot = instance.getDepot();
+            VRPNode first_node = nodes.get(route.get(0));
+            total_cost = total_cost + calculateEuclideanDistance(depot, first_node);
+
+            for(int i=1; i<route.size()-1; i++){
+
+                VRPNode node1 = nodes.get(route.get(i));
+                VRPNode node2 = nodes.get(route.get(i+1));
+                total_cost = total_cost + calculateEuclideanDistance(node1, node2);
+
+            }
+
+            // distance from last node to the depot
+            VRPNode last_node = nodes.get(route.get(route.size()-1));
+            total_cost = total_cost + calculateEuclideanDistance(depot, last_node);
+
+        }
+
+        return total_cost;
     }
 
     /**
@@ -30,7 +62,71 @@ public class Utility {
      */
     public static VRPSolution nearestNeighbourHeuristic(VRPInstance instance) {
         // TODO: Implement the nearest neighbour heuristic.
-        return null;
+
+        List<List<Integer>> routes = new ArrayList<>();
+
+        TreeMap<Integer, VRPNode> unvisited = new TreeMap<>();
+        VRPNode depot = instance.getDepot();
+
+        for(Map.Entry<Integer, VRPNode> entry: instance.getNodes().entrySet()){
+            System.out.println(entry.getValue().toString());
+            unvisited.put(entry.getKey(), entry.getValue());
+
+        }
+
+        HashSet<Integer> visited_index = new HashSet<>();
+        double[][] distance_matrix = new double[instance.getNodes().size()][instance.getNodes().size()];
+
+        for(int row=0; row<instance.getNodes().size(); row++){
+
+            VRPNode from_node = instance.getNodes().get(row+1);
+
+            for(int col=0; col<instance.getNodes().size(); col++){
+                VRPNode to_node = instance.getNodes().get(col+1);
+                distance_matrix[row][col] = calculateEuclideanDistance(from_node, to_node);
+            }
+
+        }
+
+//        while(unvisited.size() > 0){
+//
+//            double capacity = instance.getCapacity();
+//
+//            // find the node closest to depot
+//            double smallest_dist_from_depot = 10000;
+//            int closest_node_index = -1;
+//
+//            for(Map.Entry<Integer, VRPNode> entry: unvisited.entrySet()){
+//
+//                VRPNode node = entry.getValue();
+//                double distance = calculateEuclideanDistance(depot, node);
+//
+//                if(distance < smallest_dist_from_depot){
+//                    closest_node_index = entry.getKey();
+//                    smallest_dist_from_depot = distance;
+//                }
+//
+//            }
+//
+//            // start creating a route from the depot.
+//            List<Integer> route = new ArrayList<>();
+//            route.add(closest_node_index);
+//
+//            // removing the node after added to a route and update the capacity.
+//            unvisited.remove(closest_node_index, unvisited.get(closest_node_index));
+//            capacity = capacity - unvisited.get(closest_node_index).getDemand();
+//
+//            while(capacity > 0){
+//                for()
+//            }
+//
+//            routes.add(route);
+//
+//        }
+
+
+
+        return new VRPSolution(routes);
     }
 
     /**

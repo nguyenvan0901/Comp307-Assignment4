@@ -37,4 +37,8 @@ public class VRPNode {
     public void setDemand(double demand) {
         this.demand = demand;
     }
+
+    public String toString(){
+        return "ID: " + ID + " x: " + x + " y: " + y;
+    }
 }
