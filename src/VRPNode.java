@@ -39,6 +39,6 @@ public class VRPNode {
     }
 
     public String toString(){
-        return "ID: " + ID + " x: " + x + " y: " + y;
+        return "x: " + x + " y: " + y;
     }
 }
