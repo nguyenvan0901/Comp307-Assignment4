@@ -15,11 +15,9 @@ public class main {
 
 //        VRPSolution svSol = Utility.savingsHeuristic(instance);
 //        svSol.setTotalCost(Utility.calculateTotalCost(svSol, instance));
-        double a = 0.0;
-        double b = Math.round(a * 100.0) / 100.0;
-        System.out.println(b);
 
-        //VRPIO.writeSolution(nnSol, inst + "nn.sol");
+
+        VRPIO.writeSolution(nnSol, inst + "nn.sol1");
         //VRPIO.writeSolution(svSol, inst + "sv.sol");
     }
 }

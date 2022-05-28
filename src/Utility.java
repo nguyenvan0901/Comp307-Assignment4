@@ -26,6 +26,7 @@ public class Utility {
      */
     public static double calculateTotalCost(VRPSolution solution, VRPInstance instance) {
         // TODO: Implement the function to calculate the total cost of the solution.
+
         double total_cost = 0.0;
 
         Map<Integer, VRPNode> nodes = instance.getNodes();
@@ -38,7 +39,7 @@ public class Utility {
             VRPNode first_node = nodes.get(route.get(0));
             total_cost = total_cost + calculateEuclideanDistance(depot, first_node);
 
-            for(int i=1; i<route.size()-1; i++){
+            for(int i=0; i<route.size()-1; i++){
 
                 VRPNode node1 = nodes.get(route.get(i));
                 VRPNode node2 = nodes.get(route.get(i+1));
@@ -71,11 +72,6 @@ public class Utility {
             nodes.put(entry.getKey()-1, entry.getValue());
         }
 
-//        for(Map.Entry<Integer, VRPNode> entry: nodes.entrySet()){
-//            System.out.print(entry.getKey() + " ");
-//            System.out.println(entry.getValue().toString());
-//        }
-
         // ----------------------Calculate the all distances between all pair of nodes.---------------------------------
 
         double[][] distance_matrix = new double[total_nodes][total_nodes];
@@ -91,6 +87,7 @@ public class Utility {
             }
 
         }
+
         String header = "\t";
         for(int i=1; i<33; i++){
             header = header + i + "\t\t";
@@ -217,38 +214,54 @@ public class Utility {
      */
     public static VRPSolution savingsHeuristic(VRPInstance instance) {
         // TODO: Implement the savings heuristic.
-        return null;
+
+        int total_nodes = instance.getNodes().size();
+        List<List<Integer>> routes = new ArrayList<>();
+        Map<Integer, VRPNode> nodes = new HashMap<>();
+
+        // changing the id of all the nodes to start from 0.
+        for(Map.Entry<Integer, VRPNode> entry: instance.getNodes().entrySet()){
+            nodes.put(entry.getKey()-1, entry.getValue());
+        }
+
+        // ----------------------Calculate the all distances between all pair of nodes.---------------------------------
+
+        double[][] distance_matrix = new double[total_nodes][total_nodes];
+        for(int row=0; row<total_nodes; row++){
+
+            VRPNode from_node = nodes.get(row);
+
+            for(int col=0; col<total_nodes; col++){
+
+                VRPNode to_node = nodes.get(col);
+                distance_matrix[row][col] = calculateEuclideanDistance(from_node, to_node);
+
+            }
+
+        }
+
+        return new VRPSolution(routes);
+    }
+
+    public static double[][] calculateDistanceMatrix(Map<Integer, VRPNode> nodes){
+
+        int total_nodes = nodes.size();
+        double[][] distance_matrix = new double[total_nodes][total_nodes];
+
+        for(int row=0; row<total_nodes; row++){
+
+            VRPNode from_node = nodes.get(row);
+
+            for(int col=0; col<total_nodes; col++){
+
+                VRPNode to_node = nodes.get(col);
+                distance_matrix[row][col] = calculateEuclideanDistance(from_node, to_node);
+
+            }
+
+        }
+
+        return distance_matrix;
     }
 
 }
-
-
-
-
-
-//        // ---------------------Putting all the distances into sorted maps.---------------------------------------------
-//
-//        // index of each tree map represents the id of a node.
-//        List<TreeMap<Double, Integer>> sorted_maps = new ArrayList<>();  //TreeMap<distance, id>
-//
-//        // first item is null so that second item with index 1 can represent the first node.
-//        sorted_maps.add(null);
-//
-//        for(int row=0; row<total_nodes; row++){
-//
-//            TreeMap<Double, Integer> tree_map = new TreeMap<>();
-//
-//            for(int col=0; col<total_nodes; col++){
-//
-//                if(tree_map.keySet().contains(distance_matrix[row][col])){
-//                    System.out.println("already exists");
-//                }
-//                tree_map.put(distance_matrix[row][col], col+1);
-//
-//            }
-//
-//            sorted_maps.add(tree_map);
-//
-//        }
-//
-//        // -------------------------------------------------------------------------------------------------------------
