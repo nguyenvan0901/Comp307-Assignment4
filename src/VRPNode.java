@@ -22,6 +22,10 @@ public class VRPNode {
         return ID;
     }
 
+    public void setID(){
+        this.ID = this.ID - 1;
+    }
+
     public double getX() {
         return x;
     }

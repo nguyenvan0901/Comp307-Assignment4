@@ -1,15 +1,20 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class test {
-
     public static void main(String[] args) {
-        TreeMap<Double, String> tm = new TreeMap<>();
+        ArrayList<Integer> a = new ArrayList<>();
+        a.add(1);
+        a.add(2);
+        a.add(3);
+        a.add(4);
+        a.add(1);
+        a.add(2);
+        a.add(3);
 
-        tm.put(15.5, "a");
-        tm.put(10.2, "b");
-
-        for(Map.Entry<Double, String> entry: tm.entrySet()){
-            System.out.println(entry.toString());
+        for(Integer i: a){
+            System.out.println(i);
         }
+        System.out.println(a.toString());
     }
 }

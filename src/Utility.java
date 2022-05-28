@@ -74,27 +74,15 @@ public class Utility {
 
         // ----------------------Calculate the all distances between all pair of nodes.---------------------------------
 
-        double[][] distance_matrix = new double[total_nodes][total_nodes];
-        for(int row=0; row<total_nodes; row++){
-
-            VRPNode from_node = nodes.get(row);
-
-            for(int col=0; col<total_nodes; col++){
-
-                VRPNode to_node = nodes.get(col);
-                distance_matrix[row][col] = calculateEuclideanDistance(from_node, to_node);
-
-            }
-
-        }
+        double[][] distance_matrix = calculateDistanceMatrix(nodes);
 
         String header = "\t";
-        for(int i=1; i<33; i++){
+        for(int i=0; i<32; i++){
             header = header + i + "\t\t";
         }
         System.out.print(header +"\n");
         for(int row=0; row<total_nodes; row++){
-            System.out.print((row+1) + "\t");
+            System.out.print((row) + "\t");
             for(int col=0; col<total_nodes; col++){
                 if(distance_matrix[row][col] == 0.0){
                     System.out.print("0.0");
@@ -128,13 +116,14 @@ public class Utility {
 
             // -----------------------find the node that is closest to the depot----------------------------------------
             double min_distance = 1000;
+            int depot_row = 0;
             int current_id = -1;
 
             // skipping col=0 as it will be depot to depot, from 1 means from the first neighbour node.
             for(int col=1; col<total_nodes; col++){
 
-                if(!visited_id.contains(col) && distance_matrix[0][col] < min_distance){
-                    min_distance = distance_matrix[0][col];
+                if(!visited_id.contains(col) && distance_matrix[depot_row][col] < min_distance){
+                    min_distance = distance_matrix[depot_row][col];
                     current_id = col;
                 }
 
@@ -153,7 +142,7 @@ public class Utility {
                 int next_id = -1;
                 double min_dist = 1000;
 
-                // finding the closest neighbour to the current neighbour, skipping 1 as we don't want to count the
+                // finding the closest neighbour to the current neighbour, skipping 0 as we don't want to count the
                 // path back to depot.
                 for(int col=1; col<total_nodes; col++) {
 
@@ -174,7 +163,7 @@ public class Utility {
 
                 }
 
-                // if next_id == -1 means all other nodes exceed capacity, return back to depot
+                // if next_id == -1 means all other nodes exceed capacity, return to depot
                 if(next_id == -1){
                     break;
                 }
@@ -186,7 +175,7 @@ public class Utility {
                     current_id = next_id;
                 }
 
-                if(capacity == 0){
+                if(capacity == 0){ // route can't fit any more node, exit loop and create a new route.
                     break;
                 }
 
@@ -217,28 +206,116 @@ public class Utility {
 
         int total_nodes = instance.getNodes().size();
         List<List<Integer>> routes = new ArrayList<>();
-        Map<Integer, VRPNode> nodes = new HashMap<>();
+        Map<Integer, VRPNode> nodes_map = new HashMap<>();
+        double capacity = instance.getCapacity();
 
         // changing the id of all the nodes to start from 0.
         for(Map.Entry<Integer, VRPNode> entry: instance.getNodes().entrySet()){
-            nodes.put(entry.getKey()-1, entry.getValue());
+            nodes_map.put(entry.getKey()-1, entry.getValue());
+            nodes_map.get(entry.getKey()-1).setID();
         }
 
+
         // ----------------------Calculate the all distances between all pair of nodes.---------------------------------
+        double[][] distance_matrix = calculateDistanceMatrix(nodes_map);
+        // -------------------------------------------------------------------------------------------------------------
 
-        double[][] distance_matrix = new double[total_nodes][total_nodes];
-        for(int row=0; row<total_nodes; row++){
+        // ----------------------Creating initial routes----------------------------------------------------------------
+        List<Route> initial_routes = new ArrayList<>();
 
-            VRPNode from_node = nodes.get(row);
+        for(int i=1; i<total_nodes; i++){
+            initial_routes.add(new Route(nodes_map.get(i)));
+        }
 
-            for(int col=0; col<total_nodes; col++){
+        // -------------------------------------------------------------------------------------------------------------
 
-                VRPNode to_node = nodes.get(col);
-                distance_matrix[row][col] = calculateEuclideanDistance(from_node, to_node);
+        // ----------------------Creating merges between 2 nodes.-------------------------------------------------------
+
+        Queue<Merge> merge_queue = new PriorityQueue<>();
+        List<Merge> merge_list = new ArrayList<>();
+
+        for(int i=0; i<initial_routes.size(); i++){
+
+            Route r1 = initial_routes.get(i);
+
+            for(int j=0; j<initial_routes.size(); j++){
+
+                if(j != i) {
+                    Route r2 = initial_routes.get(j);
+                    int tail_r1 = r1.getTailID();
+                    int head_r2 = r2.getHeadId();
+
+                    // saving = l(v1,depot) + l(v2,depot) - l(v1,v2)
+                    double saving = distance_matrix[0][tail_r1] + distance_matrix[0][head_r2]
+                                  - distance_matrix[tail_r1][head_r2];
+
+                    Merge merge = new Merge(r1, r2, saving);
+                    merge_queue.add(merge);
+                    merge_list.add(merge);
+                }
 
             }
 
         }
+
+        Collections.sort(merge_list);
+        for(int i=0; i<100; i++){
+            System.out.println(merge_list.get(i).toString());
+        }
+        System.out.println("end testing for list \n");
+
+        for(int i=0; i<100; i++){
+            System.out.println(merge_queue.poll().toString());
+        }
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        // ----------------------Continue merging until no merge can be made.-------------------------------------------
+        for(int i=0; i<100; i++){
+            System.out.println(merge_queue.poll().toString());
+        }
+
+//        while(true){
+//
+//            boolean found_a_merge = false;
+//
+//            // this will be the merge with the highest saving.
+//            Merge merge = merge_queue.poll();
+//            Route route1 = merge.getRoute1();
+//            Route route2 = merge.getRoute2();
+//
+//            // if 2 routes' demand combined is still less than capacity, join them.
+//            if(route1.getDemand() + route2.getDemand() <= capacity){
+//
+//                found_a_merge = true;
+//
+//                // update demand of route 1
+//                route1.updateDemand(route2.getDemand());
+//
+//                // add all nodes on route 2 into route 1
+//                List<Integer> node_ids = route2.getNodes();
+//                for(Integer i: node_ids){
+//                    route1.addToRoute(i);
+//                }
+//
+//                // delete all merges from route 1 to anywhere else and also delete merge from route 2 back to route 1.
+//                for(int i=0; i<merge_queue.size(); i++){
+//
+//                    Merge m = merge_queue.get
+//
+//                }
+//
+//                // create new merge from the new route to all other route.
+//
+//            }
+//
+//            if(found_a_merge){
+//                break;
+//            }
+//
+//        }
+        // -------------------------------------------------------------------------------------------------------------
+
 
         return new VRPSolution(routes);
     }

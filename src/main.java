@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.*;
 
 public class main {
 
@@ -10,14 +11,17 @@ public class main {
 
 
         VRPSolution nnSol = Utility.nearestNeighbourHeuristic(instance);
-        System.out.println(Utility.calculateTotalCost(nnSol, instance));
+        System.out.println("total cost: " + Utility.calculateTotalCost(nnSol, instance));
         nnSol.setTotalCost(Utility.calculateTotalCost(nnSol, instance));
 
-//        VRPSolution svSol = Utility.savingsHeuristic(instance);
+        VRPSolution svSol = Utility.savingsHeuristic(instance);
 //        svSol.setTotalCost(Utility.calculateTotalCost(svSol, instance));
 
 
         VRPIO.writeSolution(nnSol, inst + "nn.sol1");
         //VRPIO.writeSolution(svSol, inst + "sv.sol");
+
+
+
     }
 }

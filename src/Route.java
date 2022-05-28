@@ -14,8 +14,9 @@ public class Route {
         this.tail_id = node.getID();
     }
 
-    public void addToSequence(int id){
-        nodes.add(id);
+    public void addToRoute(int i){
+        nodes.add(i);
+        this.tail_id = i;
     }
 
     public void updateDemand(double new_demand){
@@ -30,14 +31,23 @@ public class Route {
         return tail_id;
     }
 
+    public double getDemand(){
+        return demand;
+    }
+
+    // this method gets all the ids of nodes that are on this route.
+    public List<Integer> getNodes(){
+        return nodes;
+    }
+
     public String toString(){
-        String node_sequence = " 1, ";
+        String node_sequence = " 0,";
 
         for(Integer i: nodes){
-            node_sequence = node_sequence + i + ", ";
+            node_sequence = node_sequence + i + ",";
         }
 
-        node_sequence = node_sequence + "1";
+        node_sequence = node_sequence + "0";
 
         return node_sequence;
     }
