@@ -7,10 +7,12 @@ public class test {
         a.add(1);
         a.add(2);
         a.add(3);
-        a.add(4);
+
+        ArrayList<Integer> b = new ArrayList<>();
         a.add(1);
         a.add(2);
         a.add(3);
+
 
         for(Integer i: a){
             System.out.println(i);

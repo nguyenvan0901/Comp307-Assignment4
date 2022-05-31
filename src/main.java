@@ -15,13 +15,12 @@ public class main {
         nnSol.setTotalCost(Utility.calculateTotalCost(nnSol, instance));
 
         VRPSolution svSol = Utility.savingsHeuristic(instance);
-//        svSol.setTotalCost(Utility.calculateTotalCost(svSol, instance));
+        System.out.println("total cost: " + Utility.calculateTotalCost(svSol, instance));
+        svSol.setTotalCost(Utility.calculateTotalCost(svSol, instance));
 
 
-        VRPIO.writeSolution(nnSol, inst + "nn.sol1");
-        //VRPIO.writeSolution(svSol, inst + "sv.sol");
-
-
+        VRPIO.writeSolution(nnSol, inst + "nn.sol2");
+        VRPIO.writeSolution(svSol, inst + "sv.sol2");
 
     }
 }

@@ -1,17 +1,17 @@
 public class Merge implements Comparable<Merge>{
 
-    private Route route1;
-    private Route route2;
+    private int id1;
+    private int id2;
     private double saving;
 
-    public Merge(Route r1, Route r2, double saving){
-        this.route1 = r1;
-        this.route2 = r2;
+    public Merge(int id1, int id2, double saving){
+        this.id1 = id1;
+        this.id2 = id2;
         this.saving = saving;
     }
 
     public String toString(){
-        return route1.toString() + " -" + route2.toString() + ": saving " + saving;
+        return id1 + " - " + id2 + ": saving " + saving;
     }
 
     @Override
@@ -27,12 +27,12 @@ public class Merge implements Comparable<Merge>{
         }
     }
 
-    public Route getRoute1(){
-        return route1;
+    public int getID1(){
+        return id1;
     }
 
-    public Route getRoute2(){
-        return route2;
+    public int getID2(){
+        return id2;
     }
 
     public double getSaving(){

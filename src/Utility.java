@@ -75,32 +75,6 @@ public class Utility {
         // ----------------------Calculate the all distances between all pair of nodes.---------------------------------
 
         double[][] distance_matrix = calculateDistanceMatrix(nodes);
-
-        String header = "\t";
-        for(int i=0; i<32; i++){
-            header = header + i + "\t\t";
-        }
-        System.out.print(header +"\n");
-        for(int row=0; row<total_nodes; row++){
-            System.out.print((row) + "\t");
-            for(int col=0; col<total_nodes; col++){
-                if(distance_matrix[row][col] == 0.0){
-                    System.out.print("0.0");
-                    System.out.print("\t\t");
-                }
-                else if(distance_matrix[row][col] < 10.0){
-                    System.out.print(Math.round(distance_matrix[row][col] * 10.0) / 10.0);
-                    System.out.print("\t\t");
-                }
-                else {
-                    double a = Math.round(distance_matrix[row][col] * 10.0) / 10.0;
-                    System.out.print(a);
-                    System.out.print("\t");
-                }
-            }
-            System.out.println("");
-        }
-
         // -------------------------------------------------------------------------------------------------------------
 
 
@@ -224,98 +198,146 @@ public class Utility {
         List<Route> initial_routes = new ArrayList<>();
 
         for(int i=1; i<total_nodes; i++){
-            initial_routes.add(new Route(nodes_map.get(i)));
+            Route route = new Route(nodes_map.get(i));
+            // assign each node to a specific route.
+            nodes_map.get(i).setRoute(route);
+            initial_routes.add(route);
         }
 
         // -------------------------------------------------------------------------------------------------------------
 
         // ----------------------Creating merges between 2 nodes.-------------------------------------------------------
 
-        Queue<Merge> merge_queue = new PriorityQueue<>();
-        List<Merge> merge_list = new ArrayList<>();
+        List<Merge> feasible_merge_list = new ArrayList<>(); //using array list here because it's easier to manipulate
 
-        for(int i=0; i<initial_routes.size(); i++){
+        for(int i=1; i<total_nodes; i++){
 
-            Route r1 = initial_routes.get(i);
-
-            for(int j=0; j<initial_routes.size(); j++){
+            for(int j=i; j<total_nodes; j++){
 
                 if(j != i) {
-                    Route r2 = initial_routes.get(j);
-                    int tail_r1 = r1.getTailID();
-                    int head_r2 = r2.getHeadId();
 
                     // saving = l(v1,depot) + l(v2,depot) - l(v1,v2)
-                    double saving = distance_matrix[0][tail_r1] + distance_matrix[0][head_r2]
-                                  - distance_matrix[tail_r1][head_r2];
+                    double saving = distance_matrix[0][i] + distance_matrix[0][j]
+                                  - distance_matrix[i][j];
 
-                    Merge merge = new Merge(r1, r2, saving);
-                    merge_queue.add(merge);
-                    merge_list.add(merge);
+                    Merge merge = new Merge(i, j, saving);
+                    feasible_merge_list.add(merge);
                 }
 
             }
 
         }
 
-        Collections.sort(merge_list);
-        for(int i=0; i<100; i++){
-            System.out.println(merge_list.get(i).toString());
-        }
-        System.out.println("end testing for list \n");
-
-        for(int i=0; i<100; i++){
-            System.out.println(merge_queue.poll().toString());
-        }
+        Collections.sort(feasible_merge_list);
 
         // -------------------------------------------------------------------------------------------------------------
 
         // ----------------------Continue merging until no merge can be made.-------------------------------------------
-        for(int i=0; i<100; i++){
-            System.out.println(merge_queue.poll().toString());
-        }
 
-//        while(true){
-//
-//            boolean found_a_merge = false;
-//
-//            // this will be the merge with the highest saving.
-//            Merge merge = merge_queue.poll();
-//            Route route1 = merge.getRoute1();
-//            Route route2 = merge.getRoute2();
-//
-//            // if 2 routes' demand combined is still less than capacity, join them.
-//            if(route1.getDemand() + route2.getDemand() <= capacity){
-//
-//                found_a_merge = true;
-//
-//                // update demand of route 1
-//                route1.updateDemand(route2.getDemand());
-//
-//                // add all nodes on route 2 into route 1
-//                List<Integer> node_ids = route2.getNodes();
-//                for(Integer i: node_ids){
-//                    route1.addToRoute(i);
-//                }
-//
-//                // delete all merges from route 1 to anywhere else and also delete merge from route 2 back to route 1.
-//                for(int i=0; i<merge_queue.size(); i++){
-//
-//                    Merge m = merge_queue.get
-//
-//                }
-//
-//                // create new merge from the new route to all other route.
-//
-//            }
-//
-//            if(found_a_merge){
-//                break;
-//            }
-//
-//        }
+        while(feasible_merge_list.size() != 0){
+
+            // this will be the merge with the highest saving.
+            Merge feasible_merge = feasible_merge_list.get(0);
+
+            int node_id1 = feasible_merge.getID1();
+            int node_id2 = feasible_merge.getID2();
+
+            Route route1 = nodes_map.get(feasible_merge.getID1()).getRoute();
+            Route route2 = nodes_map.get(feasible_merge.getID2()).getRoute();
+
+            List<Integer> route_1_node = route1.getNodes();
+            List<Integer> route_2_node = route2.getNodes();
+
+            if(route1 == route2){
+                // if 2 nodes are already in the same route then skip this feasible merge.
+                feasible_merge_list.remove(0);
+            }
+
+            // check if the 2 routes exceed the instance capacity.
+            else if(route1.getDemand() + route2.getDemand() <= capacity){
+
+                // checking join condition of the 2 routes.
+                if(route1.getTailId() == node_id1 && route2.getHeadId() == node_id2){
+
+                    Route new_route = new Route();
+                    for(int node_id: route_1_node){
+                        new_route.addToRoute(nodes_map.get(node_id));
+                    }
+                    for(int node_id: route_2_node){
+                        new_route.addToRoute(nodes_map.get(node_id));
+                    }
+
+                    //System.out.println("new route: " + new_route.toString());
+
+                    // set this new route to be the current route for every node in this current route
+                    // (in route1 and route2).
+                    for(int node_id: route_1_node){
+                        nodes_map.get(node_id).setRoute(new_route);
+                    }
+
+                    for(int node_id: route_2_node){
+                        nodes_map.get(node_id).setRoute(new_route);
+                    }
+
+                    // after using the feasible merge, remove it from the list.
+                    feasible_merge_list.remove(0);
+
+                }
+
+
+                else if(route1.getHeadId() == node_id1 && route2.getTailId() == node_id2){
+
+                    Route new_route = new Route();
+                    for(int node_id: route_2_node){
+                        new_route.addToRoute(nodes_map.get(node_id));
+                    }
+
+                    for(int node_id: route_1_node){
+                        new_route.addToRoute(nodes_map.get(node_id));
+                    }
+
+                    for(int node_id: route_1_node){
+                        nodes_map.get(node_id).setRoute(new_route);
+                    }
+
+                    for(int node_id: route_2_node){
+                        nodes_map.get(node_id).setRoute(new_route);
+                    }
+
+                    feasible_merge_list.remove(0);
+
+                }
+
+                // the nodes can't be connected because tail-head rule is not satisfied, remove the feasible merge.
+                else{
+
+                    feasible_merge_list.remove(0);
+
+                }
+
+            }
+            else{
+                feasible_merge_list.remove(0);
+            }
+
+        }
         // -------------------------------------------------------------------------------------------------------------
 
+        HashSet<List<Integer>> routess = new HashSet<>();
+
+        for(int i=1; i<total_nodes; i++){
+            VRPNode node = nodes_map.get(i);
+            Route route = node.getRoute();
+            routess.add(route.getNodes());
+        }
+
+        for(List<Integer> route: routess){
+            for(int i=0; i<route.size(); i++){
+                route.set(i, route.get(i)+1);
+            }
+            routes.add(route);
+            System.out.println(route.toString());
+        }
 
         return new VRPSolution(routes);
     }
